@@ -1,0 +1,4 @@
+validate existing analysis
+move all config to central/shared mechanism
+add additional gpu tuning (min/max, undervolt/underclock)
+make inference/training tasks easily swappable
