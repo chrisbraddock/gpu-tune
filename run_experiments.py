@@ -3,7 +3,7 @@ import time
 import os
 import logging
 import colorlog
-from gpu_metrics_utils import set_gpu_power_limit, start_gpu_metrics_collector, stop_gpu_metrics_collector, initialize_nvml, shutdown_nvml
+from gpu_metrics_utils import set_gpu_power_limit, initialize_nvml, shutdown_nvml
 
 # Configuration Constants
 GPU_IDS = [0, 1]  # List of GPU IDs to use

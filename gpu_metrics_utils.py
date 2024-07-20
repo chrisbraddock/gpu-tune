@@ -1,5 +1,4 @@
 import pynvml
-# import time
 import logging
 import subprocess
 
@@ -63,11 +62,6 @@ def set_gpu_power_limit(gpu_ids, power_limit):
             logger.info(f"Set GPU {gpu_id} power limit to {power_limit} watts")
         except subprocess.CalledProcessError as e:
             logger.error(f"Failed to set power limit for GPU {gpu_id}: {e}")
-
-def start_gpu_metrics_collector(interval=10, log_file='gpu_metrics_log.csv'):
-    command = f"python gpu_metrics_collector.py --interval {interval} --log_file {log_file}"
-    process = subprocess.Popen(command, shell=True)
-    return process
 
 def stop_gpu_metrics_collector(process):
     process.terminate()

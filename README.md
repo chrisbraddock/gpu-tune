@@ -10,6 +10,21 @@ Example report:
 
 ## Dependencies
 
+### Install System Dependencies
+
+Ensure the necessary NVIDIA libraries and tools are installed:
+
+- NVIDIA CUDA Toolkit
+- NVIDIA driver
+- NVIDIA System Management Interface (nvidia-smi)
+
+To install the NVIDIA driver and tools, follow the instructions on the official NVIDIA documentation:
+
+- [NVIDIA CUDA Installation Guide for Linux](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/)
+- `nvidia-smi` is typically included with the NVIDIA driver installation.
+
+### Install Python Dependencies
+
 Install the dependencies using pip:
 
 ```bash
