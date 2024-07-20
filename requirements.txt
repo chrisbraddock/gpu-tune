@@ -1,4 +1,9 @@
-pandas
+accelerate
+colorlog
 matplotlib
-scipy
 numpy
+pandas
+pynvml
+scipy
+torch
+transformers
