@@ -43,7 +43,10 @@ python run_experiments.py
 
 ### 2. Process Experiment Data
 
-The `process_experiment_data.py` script processes the raw experiment data into a more usable format. It will generate `training_stats.csv` and `inference_stats.csv`.
+The `process_experiment_data.py` script processes the raw experiment data. It
+reads `training_stats.csv` and `inference_stats.csv` produced by the
+experiment scripts and outputs the cleaned files
+`processed_training_data.csv` and `processed_inference_data.csv`.
 
 ```bash
 python process_experiment_data.py
