@@ -73,7 +73,7 @@ def load_across_gpus(gpu_ids, batch_size, seq_length, epochs, learning_rate, cal
     # Get sample GPU metrics to dynamically generate headers
     sample_metrics = get_gpu_metrics()[0]
     gpu_headers = list(sample_metrics.keys())
-    headers = ['timestamp', 'epoch', 'iteration', 'batch', 'loss', 'tokens_per_sec'] + gpu_headers + ['max_watt']
+    headers = ['timestamp', 'epoch', 'iteration', 'batch', 'loss', 'tokens_per_sec', 'avg_tokens_per_sec'] + gpu_headers + ['max_watt']
 
     model.train()
     for epoch in range(epochs):
@@ -97,11 +97,12 @@ def load_across_gpus(gpu_ids, batch_size, seq_length, epochs, learning_rate, cal
 
             # Log statistics after each batch
             timestamp = datetime.now().isoformat()
-            tokens_per_sec = total_tokens / (time.time() - start_time)
+            tokens_per_sec = batch_labels.numel() / batch_time if batch_time > 0 else 0
+            avg_tokens_per_sec = total_tokens / (time.time() - start_time)
             from gpu_metrics_utils import collect_power_draw_all_gpus
             total_power = collect_power_draw_all_gpus()
             gpu_metrics = get_gpu_metrics()[0]
-            data = [timestamp, epoch + 1, iteration, i // batch_size + 1, loss.item(), tokens_per_sec] + list(gpu_metrics.values()) + [MAX_WATT, total_power]
+            data = [timestamp, epoch + 1, iteration, i // batch_size + 1, loss.item(), tokens_per_sec, avg_tokens_per_sec] + list(gpu_metrics.values()) + [MAX_WATT, total_power]
             if callback:
                 data = callback(data)
             log_statistics(log_file, headers + ['total_power_draw'], data)

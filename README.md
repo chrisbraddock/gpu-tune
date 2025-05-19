@@ -71,8 +71,8 @@ The recommended settings are based on the lowest energy consumption (Watt-min) f
 
 ## File Descriptions
 
-- `training_stats.csv`: Contains columns such as `max_watt`, `tokens_per_sec`, `temperature`, `gpu_utilization`, `memory_utilization`, `loss`, and `timestamp`.
-- `inference_stats.csv`: Contains columns such as `max_watt`, `tokens_per_sec`, `temperature`, `gpu_utilization`, `memory_utilization`, and `timestamp`.
+- `training_stats.csv`: Contains columns such as `max_watt`, `tokens_per_sec`, `avg_tokens_per_sec`, `temperature`, `gpu_utilization`, `memory_utilization`, `loss`, and `timestamp`.
+- `inference_stats.csv`: Contains columns such as `max_watt`, `tokens_per_sec`, `avg_tokens_per_sec`, `temperature`, `gpu_utilization`, `memory_utilization`, and `timestamp`.
 - `generate_report.py`:
   - Loads data from CSV files.
   - Cleans data by removing outliers.
