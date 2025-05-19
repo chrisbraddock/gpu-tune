@@ -14,6 +14,16 @@ inference_stats = pd.read_csv('inference_stats.csv')
 training_stats['timestamp'] = pd.to_datetime(training_stats['timestamp'])
 inference_stats['timestamp'] = pd.to_datetime(inference_stats['timestamp'])
 
+# Derive energy_per_token if missing
+if 'energy_per_token' not in inference_stats.columns:
+    inference_stats['energy_per_token'] = (
+        inference_stats['total_power_draw'] / inference_stats['tokens_per_sec']
+    )
+if 'energy_per_token' not in training_stats.columns:
+    training_stats['energy_per_token'] = (
+        training_stats['total_power_draw'] / training_stats['tokens_per_sec']
+    )
+
 # Calculate total time for each row
 inference_stats['time_diff'] = inference_stats['timestamp'].diff().dt.total_seconds().fillna(0)
 training_stats['time_diff'] = training_stats['timestamp'].diff().dt.total_seconds().fillna(0)
@@ -30,7 +40,8 @@ inference_grouped = inference_cleaned.groupby('max_watt').agg({
     'temperature': 'mean',
     'gpu_utilization': 'mean',
     'memory_utilization': 'mean',
-    'time_diff': 'sum'
+    'time_diff': 'sum',
+    'energy_per_token': 'mean'
 }).reset_index()
 
 # Training Metrics
@@ -41,7 +52,8 @@ training_grouped = training_cleaned.groupby('max_watt').agg({
     'gpu_utilization': 'mean',
     'memory_utilization': 'mean',
     'loss': 'mean',
-    'time_diff': 'sum'
+    'time_diff': 'sum',
+    'energy_per_token': 'mean'
 }).reset_index()
 
 # Generate summary tables
@@ -82,7 +94,7 @@ def plot_smooth_curve(ax, x, y, title, xlabel, ylabel, highlight_x=None):
     ax.grid(True)
 
 # Plotting the updated charts without outliers
-fig, axs = plt.subplots(6, 2, figsize=(20, 30))
+fig, axs = plt.subplots(7, 2, figsize=(20, 35))
 
 # Add header with current date and time
 fig.suptitle(f'Performance Metrics and Recommendations\nGenerated on: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}', fontsize=16)
@@ -103,6 +115,9 @@ plot_smooth_curve(axs[3, 0], inference_grouped['max_watt'], inference_grouped['m
 plot_smooth_curve(axs[4, 0], inference_grouped['max_watt'], inference_grouped['time_diff'],
                   'Max Power vs. Total Time (Inference)', 'Max Power (W)', 'Total Time (seconds)', highlight_x=optimal_inference_watt)
 
+plot_smooth_curve(axs[5, 0], inference_grouped['max_watt'], inference_grouped['energy_per_token'],
+                  'Max Power vs. Energy per Token (Inference)', 'Max Power (W)', 'Energy per Token (W*s/token)', highlight_x=optimal_inference_watt)
+
 # Training Metrics
 plot_smooth_curve(axs[0, 1], training_grouped['max_watt'], training_grouped['tokens_per_sec'],
                   'Max Power vs. Tokens per Second (Training)', 'Max Power (W)', 'Tokens per Second', highlight_x=optimal_training_watt)
@@ -119,18 +134,22 @@ plot_smooth_curve(axs[3, 1], training_grouped['max_watt'], training_grouped['mem
 plot_smooth_curve(axs[4, 1], training_grouped['max_watt'], training_grouped['time_diff'],
                   'Max Power vs. Total Time (Training)', 'Max Power (W)', 'Total Time (seconds)', highlight_x=optimal_training_watt)
 
+plot_smooth_curve(axs[5, 1], training_grouped['max_watt'], training_grouped['energy_per_token'],
+                  'Max Power vs. Energy per Token (Training)', 'Max Power (W)', 'Energy per Token (W*s/token)', highlight_x=optimal_training_watt)
+
 # Summary with recommended settings
 summary_text = (
     f"Recommended Settings:\n"
     f"Optimal Max Power for Training: {optimal_training_watt}W\n"
     f"Optimal Max Power for Inference: {optimal_inference_watt}W\n\n"
     "Recommendations are based on the lowest energy consumption (Watt-min) for each scenario.\n"
-    "Energy consumption is calculated as the product of power draw and total time taken."
+    "Energy consumption is calculated as the product of power draw and total time taken.\n"
+    "Energy per token is the instantaneous power divided by token generation rate."
 )
 
-axs[5, 0].axis('off')
-axs[5, 1].text(0.5, 0.5, summary_text, ha='center', va='center', fontsize=12, wrap=True)
-axs[5, 1].axis('off')
+axs[6, 0].axis('off')
+axs[6, 1].text(0.5, 0.5, summary_text, ha='center', va='center', fontsize=12, wrap=True)
+axs[6, 1].axis('off')
 
 plt.tight_layout(rect=[0, 0, 1, 0.96])
 plt.savefig('report.png')

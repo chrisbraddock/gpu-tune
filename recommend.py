@@ -8,6 +8,15 @@ inference_stats = pd.read_csv('inference_stats.csv')
 training_stats['timestamp'] = pd.to_datetime(training_stats['timestamp'])
 inference_stats['timestamp'] = pd.to_datetime(inference_stats['timestamp'])
 
+if 'energy_per_token' not in inference_stats.columns:
+    inference_stats['energy_per_token'] = (
+        inference_stats['total_power_draw'] / inference_stats['tokens_per_sec']
+    )
+if 'energy_per_token' not in training_stats.columns:
+    training_stats['energy_per_token'] = (
+        training_stats['total_power_draw'] / training_stats['tokens_per_sec']
+    )
+
 # Function to calculate summary statistics
 def calculate_summary(data):
     numeric_data = data.select_dtypes(include='number')

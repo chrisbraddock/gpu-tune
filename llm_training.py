@@ -73,7 +73,9 @@ def load_across_gpus(gpu_ids, batch_size, seq_length, epochs, learning_rate, cal
     # Get sample GPU metrics to dynamically generate headers
     sample_metrics = get_gpu_metrics()[0]
     gpu_headers = list(sample_metrics.keys())
-    headers = ['timestamp', 'epoch', 'iteration', 'batch', 'loss', 'tokens_per_sec'] + gpu_headers + ['max_watt']
+    headers = ['timestamp', 'epoch', 'iteration', 'batch', 'loss', 'tokens_per_sec'] + gpu_headers + [
+        'max_watt', 'total_power_draw', 'energy_per_token'
+    ]
 
     model.train()
     for epoch in range(epochs):
@@ -101,10 +103,22 @@ def load_across_gpus(gpu_ids, batch_size, seq_length, epochs, learning_rate, cal
             from gpu_metrics_utils import collect_power_draw_all_gpus
             total_power = collect_power_draw_all_gpus()
             gpu_metrics = get_gpu_metrics()[0]
-            data = [timestamp, epoch + 1, iteration, i // batch_size + 1, loss.item(), tokens_per_sec] + list(gpu_metrics.values()) + [MAX_WATT, total_power]
+            energy_per_token = total_power / tokens_per_sec if tokens_per_sec else 0
+            data = [
+                timestamp,
+                epoch + 1,
+                iteration,
+                i // batch_size + 1,
+                loss.item(),
+                tokens_per_sec,
+                *list(gpu_metrics.values()),
+                MAX_WATT,
+                total_power,
+                energy_per_token,
+            ]
             if callback:
                 data = callback(data)
-            log_statistics(log_file, headers + ['total_power_draw'], data)
+            log_statistics(log_file, headers, data)
             logger.info(f"Logged statistics: {data}")
 
     shutdown_nvml()
