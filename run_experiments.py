@@ -10,7 +10,7 @@ GPU_IDS = [0, 1]  # List of GPU IDs to use
 MAX_WATT_VALUES = [150, 175, 200, 225, 250, 275, 300]  # Example values, adjust as needed
 TRAINING_SCRIPT = "./llm_training.py"
 INFERENCE_SCRIPT = "./llm_inference.py"
-LOG_FILE = "experiment.log"
+LOG_FILE = "experiment_log.csv"
 ITERATION_SLEEP=10
 
 # Setup color logging
@@ -22,8 +22,12 @@ logger = colorlog.getLogger()
 logger.addHandler(handler)
 logger.setLevel(logging.DEBUG)
 
+if not os.path.isfile(LOG_FILE):
+    with open(LOG_FILE, 'w') as f:
+        f.write('timestamp,level,message\n')
+
 file_handler = logging.FileHandler(LOG_FILE)
-file_handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s:%(message)s'))
+file_handler.setFormatter(logging.Formatter('%(asctime)s,%(levelname)s,%(message)s'))
 logger.addHandler(file_handler)
 
 def run_script(script, max_watt):
