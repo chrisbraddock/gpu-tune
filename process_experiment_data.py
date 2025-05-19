@@ -18,9 +18,25 @@ def read_csv(file_path):
 def merge_data(main_df, additional_df, on='timestamp', tolerance=MERGE_TOLERANCE):
     """Merge dataframes based on the closest preceding timestamp with a tolerance."""
     additional_df['timestamp'] = pd.to_datetime(additional_df['timestamp'])
-    merged_df = pd.merge_asof(main_df.sort_values('timestamp'),
-                              additional_df.sort_values('timestamp'),
-                              on='timestamp', direction='backward', tolerance=tolerance)
+    merged_df = pd.merge_asof(
+        main_df.sort_values('timestamp'),
+        additional_df.sort_values('timestamp'),
+        on='timestamp',
+        direction='backward',
+        tolerance=tolerance,
+        suffixes=('', '_extra'),
+    )
+
+    # Preserve total_power_draw if present in either dataframe
+    if 'total_power_draw_extra' in merged_df.columns:
+        if 'total_power_draw' not in merged_df.columns:
+            merged_df.rename(columns={'total_power_draw_extra': 'total_power_draw'}, inplace=True)
+        else:
+            merged_df['total_power_draw'] = merged_df['total_power_draw'].fillna(merged_df['total_power_draw_extra'])
+        merged_df.drop(columns=['total_power_draw_extra'], inplace=True)
+    elif 'total_power_draw' not in merged_df.columns and 'power_draw' in merged_df.columns:
+        merged_df['total_power_draw'] = merged_df['power_draw']
+
     return merged_df
 
 def process_inference_data(experiment_log, inference_stats, gpu_metrics):

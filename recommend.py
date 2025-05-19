@@ -10,11 +10,17 @@ inference_stats['timestamp'] = pd.to_datetime(inference_stats['timestamp'])
 
 # Function to calculate summary statistics
 def calculate_summary(data):
-    numeric_data = data.select_dtypes(include='number')
+    numeric_data = data.select_dtypes(include='number').copy()
     numeric_data['max_watt'] = data['max_watt']
     grouped = numeric_data.groupby('max_watt').mean()  # Use mean instead of median
-    grouped['total_time_min'] = data.groupby('max_watt').apply(lambda x: (x['timestamp'].max() - x['timestamp'].min()).total_seconds() / 60.0)
-    grouped['energy_consumption_watt_min'] = grouped['power_draw'] * grouped['total_time_min']
+    grouped['total_time_min'] = (
+        data.groupby('max_watt').apply(
+            lambda x: (x['timestamp'].max() - x['timestamp'].min()).total_seconds() / 60.0
+        )
+    )
+
+    power_col = 'total_power_draw' if 'total_power_draw' in grouped.columns else 'power_draw'
+    grouped['energy_consumption_watt_min'] = grouped[power_col] * grouped['total_time_min']
     return grouped
 
 # Function to recommend sweet spot
