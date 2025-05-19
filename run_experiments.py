@@ -26,12 +26,16 @@ file_handler = logging.FileHandler(LOG_FILE)
 file_handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s:%(message)s'))
 logger.addHandler(file_handler)
 
-def run_script(script, max_watt):
+def run_script(script, max_watt, nprocs=None):
     """Run a specified script with max_watt as an environment variable."""
     try:
         env = os.environ.copy()
         env['MAX_WATT'] = str(max_watt)
-        subprocess.run(f"python {script}", shell=True, check=True, env=env)
+        if nprocs:
+            cmd = f"torchrun --nproc_per_node={nprocs} {script}"
+        else:
+            cmd = f"python {script}"
+        subprocess.run(cmd, shell=True, check=True, env=env)
         logger.info(f"Completed running {script}")
     except subprocess.CalledProcessError as e:
         logger.error(f"Failed to run script {script}: {e}")
@@ -47,7 +51,7 @@ def main():
 
         # Run the training script
         logger.info(f"Running the training script {TRAINING_SCRIPT}")
-        run_script(TRAINING_SCRIPT, max_watt)
+        run_script(TRAINING_SCRIPT, max_watt, nprocs=len(GPU_IDS))
 
         # Run the inference script
         logger.info(f"Running the inference script {INFERENCE_SCRIPT}")
