@@ -41,7 +41,17 @@ The `run_experiments.py` script orchestrates the running of experiments and data
 python run_experiments.py
 ```
 
-### 2. Process Experiment Data
+### 2. Distributed Training
+
+The training script uses `torch.nn.parallel.DistributedDataParallel`. To run it manually, launch one process per GPU with `torchrun`:
+
+```bash
+torchrun --nproc_per_node=<num_gpus> llm_training.py
+```
+
+`run_experiments.py` automatically uses this launch method when calling `llm_training.py`.
+
+### 3. Process Experiment Data
 
 The `process_experiment_data.py` script processes the raw experiment data into a more usable format. It will generate `training_stats.csv` and `inference_stats.csv`.
 
@@ -49,7 +59,7 @@ The `process_experiment_data.py` script processes the raw experiment data into a
 python process_experiment_data.py
 ```
 
-### 3. Generate Plots and Recommendations
+### 4. Generate Plots and Recommendations
 
 The `generate_report.py` script generates visualizations and highlights the recommended max power settings based on the provided data.
 
@@ -57,7 +67,7 @@ The `generate_report.py` script generates visualizations and highlights the reco
 python generate_report.py
 ```
 
-### 4. Viewing the Output
+### 5. Viewing the Output
 
 The output image `report.png` contains the following:
 
