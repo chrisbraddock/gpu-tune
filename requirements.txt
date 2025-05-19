@@ -7,3 +7,4 @@ pynvml
 scipy
 torch
 transformers
+pytest
