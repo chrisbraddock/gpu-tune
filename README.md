@@ -67,12 +67,12 @@ The output image `report.png` contains the following:
 
 ## Explanation of Recommendations
 
-The recommended settings are based on the lowest energy consumption (Watt-min) for each scenario. Energy consumption is calculated as the product of power draw and total time taken.
+The recommended settings are based on the lowest energy consumption (Watt-min) for each scenario. Energy consumption is calculated as the product of power draw and total time taken. The scripts also record **energy per token**, calculated as the instantaneous power draw divided by the token generation rate.
 
 ## File Descriptions
 
-- `training_stats.csv`: Contains columns such as `max_watt`, `tokens_per_sec`, `temperature`, `gpu_utilization`, `memory_utilization`, `loss`, and `timestamp`.
-- `inference_stats.csv`: Contains columns such as `max_watt`, `tokens_per_sec`, `temperature`, `gpu_utilization`, `memory_utilization`, and `timestamp`.
+- `training_stats.csv`: Contains columns such as `max_watt`, `tokens_per_sec`, `total_power_draw`, `energy_per_token`, `temperature`, `gpu_utilization`, `memory_utilization`, `loss`, and `timestamp`.
+- `inference_stats.csv`: Contains columns such as `max_watt`, `tokens_per_sec`, `total_power_draw`, `energy_per_token`, `temperature`, `gpu_utilization`, `memory_utilization`, and `timestamp`.
 - `generate_report.py`:
   - Loads data from CSV files.
   - Cleans data by removing outliers.
