@@ -67,3 +67,9 @@ def stop_gpu_metrics_collector(process):
     process.terminate()
     process.wait()
     logger.info("Terminated GPU metrics collector")
+
+def collect_power_draw_all_gpus():
+    """Sum power_draw across all GPUs."""
+    metrics_list = get_gpu_metrics()
+    total_power = sum(m['power_draw'] for m in metrics_list)
+    return total_power

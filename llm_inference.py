@@ -76,18 +76,25 @@ def load_across_gpus(seq_length, batch_size, model_variant, max_iterations, call
             batch_end_time = time.time()
 
             batch_time = batch_end_time - batch_start_time
-            total_tokens += batch_size * seq_length
+            # Count actual tokens generated
+            if hasattr(outputs, 'shape'):
+                actual_tokens = outputs.shape[-1] * outputs.shape[0]
+            else:
+                actual_tokens = sum([o.shape[-1] for o in outputs])
+            total_tokens += actual_tokens
 
             logger.info(f"Inference completed in {batch_time:.4f} seconds")
 
             # Log statistics after each iteration
             timestamp = datetime.now().isoformat()
             tokens_per_sec = total_tokens / (time.time() - start_time)
-            gpu_metrics = get_gpu_metrics()[0]  # Assuming single GPU for simplicity
-            data = [timestamp, tokens_per_sec] + list(gpu_metrics.values()) + [MAX_WATT]
+            from gpu_metrics_utils import collect_power_draw_all_gpus
+            total_power = collect_power_draw_all_gpus()
+            gpu_metrics = get_gpu_metrics()[0]
+            data = [timestamp, tokens_per_sec] + list(gpu_metrics.values()) + [MAX_WATT, total_power]
             if callback:
                 data = callback(data)
-            log_statistics(LOG_FILE, headers, data)
+            log_statistics(LOG_FILE, headers + ['total_power_draw'], data)
             logger.info(f"Logged statistics: {data}")
 
     shutdown_nvml()

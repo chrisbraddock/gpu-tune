@@ -91,18 +91,20 @@ def load_across_gpus(gpu_ids, batch_size, seq_length, epochs, learning_rate, cal
 
             batch_end_time = time.time()
             batch_time = batch_end_time - batch_start_time
-            total_tokens += batch_size * seq_length
+            total_tokens += batch_labels.numel()  # More accurate token count
 
             logger.info(f"Epoch {epoch + 1}/{epochs}, Iteration {iteration}, Batch {i // batch_size + 1} completed, Loss: {loss.item()}")
 
             # Log statistics after each batch
             timestamp = datetime.now().isoformat()
             tokens_per_sec = total_tokens / (time.time() - start_time)
-            gpu_metrics = get_gpu_metrics()[0]  # Assuming single GPU for simplicity
-            data = [timestamp, epoch + 1, iteration, i // batch_size + 1, loss.item(), tokens_per_sec] + list(gpu_metrics.values()) + [MAX_WATT]
+            from gpu_metrics_utils import collect_power_draw_all_gpus
+            total_power = collect_power_draw_all_gpus()
+            gpu_metrics = get_gpu_metrics()[0]
+            data = [timestamp, epoch + 1, iteration, i // batch_size + 1, loss.item(), tokens_per_sec] + list(gpu_metrics.values()) + [MAX_WATT, total_power]
             if callback:
                 data = callback(data)
-            log_statistics(log_file, headers, data)
+            log_statistics(log_file, headers + ['total_power_draw'], data)
             logger.info(f"Logged statistics: {data}")
 
     shutdown_nvml()
