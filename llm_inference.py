@@ -60,9 +60,7 @@ def load_across_gpus(seq_length, batch_size, model_variant, max_iterations, call
     total_tokens = 0
 
     # Get sample GPU metrics to dynamically generate headers
-    sample_metrics = get_gpu_metrics()[0]
-    gpu_headers = list(sample_metrics.keys())
-    headers = ['timestamp', 'tokens_per_sec'] + gpu_headers + ['max_watt']
+    headers = ['timestamp', 'tokens_per_sec', 'max_watt']
 
     for iteration in range(max_iterations):
         model.eval()
@@ -90,8 +88,7 @@ def load_across_gpus(seq_length, batch_size, model_variant, max_iterations, call
             tokens_per_sec = total_tokens / (time.time() - start_time)
             from gpu_metrics_utils import collect_power_draw_all_gpus
             total_power = collect_power_draw_all_gpus()
-            gpu_metrics = get_gpu_metrics()[0]
-            data = [timestamp, tokens_per_sec] + list(gpu_metrics.values()) + [MAX_WATT, total_power]
+            data = [timestamp, tokens_per_sec, MAX_WATT, total_power]
             if callback:
                 data = callback(data)
             log_statistics(LOG_FILE, headers + ['total_power_draw'], data)
